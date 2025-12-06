@@ -69,6 +69,7 @@ const SpinnerWheel = ({
             fontSize={16}
             fontWeight='bold'
             textAnchor='middle'
+            transform={`rotate(${textAngle}, ${textPosition.x}, ${textPosition.y})`}
           >
             {limb}
           </SvgText>
