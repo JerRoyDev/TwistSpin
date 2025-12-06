@@ -22,10 +22,14 @@ export default function GameScreen() {
   const determineResult = useCallback(
     (angle: number) => {
       const normalized = angle % 360;
+      // Calculate the angle on the wheel that aligns with the top pointer (0 degrees)
+      // Since the wheel rotates clockwise, we subtract the rotation from 360
+      const effectiveAngle = (360 - normalized) % 360;
+
       const limbIndex =
-        Math.floor(normalized / parentAngle) % DEFAULT_LIMBS.length;
+        Math.floor(effectiveAngle / parentAngle) % DEFAULT_LIMBS.length;
       const colorIndex =
-        Math.floor((normalized % parentAngle) / subAngle) %
+        Math.floor((effectiveAngle % parentAngle) / subAngle) %
         DEFAULT_COLORS.length;
       const color = DEFAULT_COLORS[colorIndex];
       setResult(`${DEFAULT_LIMBS[limbIndex]} • ${color.label}`);
