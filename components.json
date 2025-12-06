@@ -1,0 +1,14 @@
+{
+  "$schema": "https://rnr.vercel.app/schema.json",
+  "style": "default",
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "global.css",
+    "baseColor": "slate"
+  },
+  "aliases": {
+    "components": "~/components",
+    "lib": "~/lib",
+    "ui": "~/components/ui"
+  }
+}
