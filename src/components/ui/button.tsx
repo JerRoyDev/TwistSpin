@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Pressable, Text } from 'react-native';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '~/lib/utils';
+import { cn } from '@/utils/utils';
 
 const buttonVariants = cva(
   'flex flex-row items-center justify-center rounded-md',

@@ -1,9 +1,10 @@
 {
   "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "strict": true,
     "paths": {
-      "~/*": ["./*"]
+      "@/*": ["./src/*"]
     }
   }
 }
