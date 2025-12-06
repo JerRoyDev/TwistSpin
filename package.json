@@ -28,6 +28,7 @@
   "devDependencies": {
     "@react-native-reusables/cli": "^0.5.4",
     "@types/react": "~19.1.0",
+    "babel-preset-expo": "^54.0.8",
     "typescript": "~5.9.2"
   },
   "private": true
