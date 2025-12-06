@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
-import { Animated, Easing, SafeAreaView, Text, View } from 'react-native';
+import { Animated, Easing, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/button';
 import {
@@ -58,7 +59,7 @@ export default function GameScreen() {
 
   return (
     <SafeAreaView className='flex-1 bg-slate-900'>
-      <View className='flex-1 px-6 py-6'>
+      <View className='flex-1 bg-slate-900'>
         <View className='items-center'>
           <Text className='text-sm uppercase tracking-[0.3em] text-slate-400'>
             TwistSpin
