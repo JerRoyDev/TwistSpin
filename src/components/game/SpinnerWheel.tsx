@@ -66,7 +66,7 @@ const SpinnerWheel = ({
             fill='#f8fafc'
             stroke='#0f172a'
             strokeWidth={0.5}
-            fontSize={12}
+            fontSize={16}
             fontWeight='bold'
             textAnchor='middle'
           >
@@ -90,7 +90,9 @@ const SpinnerWheel = ({
 
   return (
     <View className='items-center justify-center'>
-      <View className='absolute -top-6 h-0 w-0 border-l-[8px] border-r-[8px] border-b-[28px] border-l-transparent border-r-transparent border-b-amber-400' />
+      {/* Pointer */}
+      <View className='absolute -top-5 z-10 h-0 w-0 border-l-[8px] border-r-[8px] border-t-[28px] border-l-transparent border-r-transparent border-t-amber-100' />
+      {/* Spinner Wheel */}
       <Animated.View
         style={rotationStyle}
         className='rounded-full border-4 border-white/20 bg-slate-900/60'
