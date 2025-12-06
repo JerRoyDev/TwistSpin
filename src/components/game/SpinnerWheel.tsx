@@ -1,11 +1,11 @@
 import React from 'react';
-import { Animated, View } from 'react-native';
-import Svg, { Path, Text as SvgText } from 'react-native-svg';
+import { Animated, View, Image } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 const DEFAULT_LIMBS = [
   'Right Hand',
-  'Left Hand',
   'Right Foot',
+  'Left Hand',
   'Left Foot',
 ] as const;
 type ColorSection = { label: string; value: string };
@@ -34,49 +34,53 @@ const SpinnerWheel = ({
   const parentSections = limbs.length;
   const parentAngle = 360 / parentSections;
   const subSectionAngle = parentAngle / colors.length;
+  const limbImages: Record<string, any> = {
+    'right hand': require('assets/limbs/right-hand-icon.png'),
+    'left hand': require('assets/limbs/left-hand-icon.png'),
+    'right foot': require('assets/limbs/right-footprint-icon.png'),
+    'left foot': require('assets/limbs/left-footprint-icon.png'),
+  };
 
-  const renderSections = () => {
-    return limbs.map((limb, parentIndex) => {
-      const parentStart = parentIndex * parentAngle;
-      const textAngle = parentStart + parentAngle / 2;
-      const textPosition = polarToCartesian(100, 100, 60, textAngle);
+  const sections = limbs.map((limb, parentIndex) => {
+    const parentStart = parentIndex * parentAngle;
+    const midAngle = parentStart + parentAngle / 2;
+    const iconPosition = polarToCartesian(100, 100, 60, midAngle);
 
-      const subsections = colors.map((color, subIndex) => {
-        const subStart = parentStart + subIndex * subSectionAngle;
-        const subEnd = subStart + subSectionAngle;
-        const path = describeArc(100, 100, RADIUS, subStart, subEnd);
-
-        return (
-          <Path
-            key={`${parentIndex}-${subIndex}`}
-            d={path}
-            fill={color.value}
-            stroke='#0f172a'
-            strokeWidth={1}
-          />
-        );
-      });
+    const subsections = colors.map((color, subIndex) => {
+      const subStart = parentStart + subIndex * subSectionAngle;
+      const subEnd = subStart + subSectionAngle;
+      const path = describeArc(100, 100, RADIUS, subStart, subEnd);
 
       return (
-        <React.Fragment key={limb}>
-          {subsections}
-          <SvgText
-            x={textPosition.x}
-            y={textPosition.y}
-            fill='#f8fafc'
-            stroke='#0f172a'
-            strokeWidth={0.5}
-            fontSize={16}
-            fontWeight='bold'
-            textAnchor='middle'
-            transform={`rotate(${textAngle}, ${textPosition.x}, ${textPosition.y})`}
-          >
-            {limb}
-          </SvgText>
-        </React.Fragment>
+        <Path
+          key={`${parentIndex}-${subIndex}`}
+          d={path}
+          fill={color.value}
+          stroke='#0f172a'
+          strokeWidth={0.7}
+        />
       );
     });
-  };
+
+    const boundaryPath = describeArc(
+      100,
+      100,
+      RADIUS,
+      parentStart,
+      parentStart + parentAngle
+    );
+
+    const limbImage = limbImages[limb.toLowerCase()];
+
+    return {
+      key: limb,
+      subsections,
+      boundaryPath,
+      limbImage,
+      iconPosition,
+      angle: midAngle,
+    };
+  });
 
   const rotationStyle = {
     transform: [
@@ -99,8 +103,46 @@ const SpinnerWheel = ({
         className='rounded-full border-4 border-white/20 bg-slate-900/60'
       >
         <Svg width={VIEWBOX_SIZE} height={VIEWBOX_SIZE} viewBox='0 0 200 200'>
-          {renderSections()}
+          {sections.map((section) => (
+            <React.Fragment key={section.key}>
+              {section.subsections}
+              <Path
+                d={section.boundaryPath}
+                fill='none'
+                stroke='#0f172a'
+                strokeWidth={2}
+              />
+            </React.Fragment>
+          ))}
         </Svg>
+
+        {sections.map((section) => {
+          if (!section.limbImage) return null;
+
+          return (
+            <Animated.View
+              key={section.key}
+              style={{
+                position: 'absolute',
+                left: section.iconPosition.x - 25, // Adjusted for larger icons
+                top: section.iconPosition.y - 25, // Adjusted for larger icons
+                width: 50, // Increased icon size
+                height: 50, // Increased icon size
+                transform: [
+                  {
+                    rotate: `${section.angle}deg`, // Rotate icon to face outward
+                  },
+                ],
+              }}
+            >
+              <Image
+                source={section.limbImage}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode='contain'
+              />
+            </Animated.View>
+          );
+        })}
       </Animated.View>
     </View>
   );
