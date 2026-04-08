@@ -22,7 +22,7 @@ React Native Expo app - Automatic Twister spinner
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/JerRoyDev/TwistSpin.git
+git clone https://github.com/Jryolsn/TwistSpin.git
 cd TwistSpin
 ```
 

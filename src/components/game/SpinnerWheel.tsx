@@ -1,5 +1,5 @@
-import React from 'react';
-import { Animated, View, Image } from 'react-native';
+import React, { useEffect } from 'react';
+import { Animated, View, Image, Easing } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 const DEFAULT_LIMBS = [
@@ -8,7 +8,6 @@ const DEFAULT_LIMBS = [
   'Left Hand',
   'Left Foot',
 ] as const;
-type ColorSection = { label: string; value: string };
 
 const DEFAULT_COLORS: readonly ColorSection[] = [
   { label: 'Red', value: '#ef4444' },
@@ -20,14 +19,22 @@ const DEFAULT_COLORS: readonly ColorSection[] = [
 const VIEWBOX_SIZE = 200;
 const RADIUS = 100;
 
+type ColorSection = { label: string; value: string };
+
 type SpinnerWheelProps = {
   rotation: Animated.Value;
+  setResult: (result: { limb: string; color: ColorSection }) => void;
+  isSpinning: boolean;
+  setIsSpinning: (spinning: boolean) => void;
   limbs?: readonly string[];
   colors?: readonly ColorSection[];
 };
 
 const SpinnerWheel = ({
   rotation,
+  setResult,
+  isSpinning,
+  setIsSpinning,
   limbs = DEFAULT_LIMBS,
   colors = DEFAULT_COLORS,
 }: SpinnerWheelProps) => {
@@ -40,6 +47,37 @@ const SpinnerWheel = ({
     'right foot': require('assets/limbs/right-footprint-icon.png'),
     'left foot': require('assets/limbs/left-footprint-icon.png'),
   };
+
+  const determineResult = (angle: number) => {
+    const normalized = angle % 360;
+    const effectiveAngle = (360 - normalized) % 360;
+
+    const limbIndex = Math.floor(effectiveAngle / parentAngle) % limbs.length;
+    const colorIndex =
+      Math.floor((effectiveAngle % parentAngle) / subSectionAngle) %
+      colors.length;
+    const color = colors[colorIndex];
+    setResult({ limb: limbs[limbIndex], color: { label: color.label, value: color.value } });
+  };
+
+  useEffect(() => {
+    if (isSpinning) {
+      rotation.setValue(0);
+      const randomOffset = Math.floor(Math.random() * 360);
+      const totalRotation = 720 + randomOffset; // at least two full spins
+
+      Animated.timing(rotation, {
+        toValue: totalRotation,
+        duration: 2200,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start(() => {
+        determineResult(totalRotation);
+        setIsSpinning(false);
+      });
+    }
+
+  }, [isSpinning]);
 
   const sections = limbs.map((limb, parentIndex) => {
     const parentStart = parentIndex * parentAngle;

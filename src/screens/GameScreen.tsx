@@ -1,97 +1,71 @@
-import { useCallback, useRef, useState } from 'react';
-import { Animated, Easing, Text, View } from 'react-native';
+import { useState, useRef } from 'react';
+import { Animated, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/button';
-import {
-  AutoSpinTimer,
-  DEFAULT_COLORS,
-  DEFAULT_LIMBS,
-  SpinnerWheel,
-  SpinButton,
-} from '@/components/game';
+import { AutoSpinTimer, SpinnerWheel, SpinButton, ColorSection } from '@/components/game';
+import { ResultBoard } from '@/components/game/ResultBoard';
+import LimbPosition from '@/components/game/LimbPosition';
 
 export default function GameScreen() {
   const router = useRouter();
   const rotation = useRef(new Animated.Value(0)).current;
   const [isSpinning, setIsSpinning] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
-
-  const parentAngle = 360 / DEFAULT_LIMBS.length;
-  const subAngle = parentAngle / DEFAULT_COLORS.length;
-
-  const determineResult = useCallback(
-    (angle: number) => {
-      const normalized = angle % 360;
-      // Calculate the angle on the wheel that aligns with the top pointer (0 degrees)
-      // Since the wheel rotates clockwise, we subtract the rotation from 360
-      const effectiveAngle = (360 - normalized) % 360;
-
-      const limbIndex =
-        Math.floor(effectiveAngle / parentAngle) % DEFAULT_LIMBS.length;
-      const colorIndex =
-        Math.floor((effectiveAngle % parentAngle) / subAngle) %
-        DEFAULT_COLORS.length;
-      const color = DEFAULT_COLORS[colorIndex];
-      setResult(`${DEFAULT_LIMBS[limbIndex]} • ${color.label}`);
-      rotation.setValue(normalized);
-    },
-    [parentAngle, subAngle, rotation]
+  const [result, setResult] = useState<{ limb: string; color: ColorSection } | null>(
+    null
   );
+  const [limbPositions, setLimbPositions] = useState<Record<string, ColorSection | null>>({
+    'Left Hand': null,
+    'Right Hand': null,
+    'Left Foot': null,
+    'Right Foot': null,
+  });
 
-  const spin = useCallback(() => {
-    if (isSpinning) return;
-    setIsSpinning(true);
-    rotation.setValue(0);
-    const randomOffset = Math.floor(Math.random() * 360);
-    const totalRotation = 720 + randomOffset; // at least two full spins
-
-    Animated.timing(rotation, {
-      toValue: totalRotation,
-      duration: 2200,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start(() => {
-      determineResult(totalRotation);
-      setIsSpinning(false);
-    });
-  }, [determineResult, isSpinning, rotation]);
+  const handleSpinResult = (newResult: { limb: string; color: ColorSection }) => {
+    // Uppdatera senaste snurret
+    setResult(newResult);
+    
+    // Uppdatera kartan (behåll gamla, skriv över den nya limbens plats)
+    setLimbPositions(prev => ({
+      ...prev,
+      [newResult.limb]: newResult.color
+    }));
+  };
 
   return (
     <SafeAreaView className='flex-1 bg-slate-900'>
-      <View className='flex-1 bg-slate-900'>
-        <View className='items-center'>
+      {/* Container med padding för att undvika kanterna och fördela innehåll */}
+      <View className='flex-1 items-center justify-between py-6 px-4'>
+        
+        {/* Rubrik */}
+        <View>
           <Text className='text-sm uppercase tracking-[0.3em] text-slate-400'>
             TwistSpin
           </Text>
-          <Text className='mt-2 text-4xl font-bold text-white'>
-            Snurra hjulet
-          </Text>
-          <Text className='mt-1 text-center text-slate-400'>
-            Få nästa rörelse för spelet Twister
-          </Text>
         </View>
 
-        <View className='mt-8 items-center'>
-          <SpinnerWheel rotation={rotation} />
-          {result && (
-            <View className='mt-6 rounded-full bg-white/10 px-6 py-3'>
-              <Text className='text-lg font-semibold text-white'>{result}</Text>
-            </View>
-          )}
+        {/* Spelplanen - Centrerad i mitten */}
+        <View className='items-center justify-center gap-4'>
+          <LimbPosition positions={limbPositions} />
+          <ResultBoard isSpinning={isSpinning} result={result} />
         </View>
+          
+        <SpinnerWheel
+          rotation={rotation}
+          setResult={handleSpinResult}
+          isSpinning={isSpinning}
+          setIsSpinning={setIsSpinning}
+        />
 
-        <View className='mt-10 items-center gap-6'>
-          <SpinButton onPress={spin} isSpinning={isSpinning} />
-          <AutoSpinTimer onAutoSpin={spin} isSpinning={isSpinning} />
-        </View>
-
-        <View className='mt-auto items-center'>
-          <Button
-            label='Tillbaka till meny'
-            variant='outline'
-            className='mt-6 w-full'
-            onPress={() => router.back()}
+        {/* Kontroller */}       
+        <View className='items-center gap-4'>
+          <SpinButton
+            onPress={() => setIsSpinning(true)}
+            isSpinning={isSpinning}
+          />
+          <AutoSpinTimer
+            onAutoSpin={() => setIsSpinning(true)}
+            isSpinning={isSpinning}
           />
         </View>
       </View>
